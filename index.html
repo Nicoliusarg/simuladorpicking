@@ -1,20 +1,1085 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>Simulador Voice Picking</title>
-  <link rel="manifest" href="manifest.json">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: Arial, sans-serif;
+      background-color: #0145AD;
+      color: white;
+      overflow: hidden;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 20px;
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .pantalla {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 400px;
+    }
+    .pantalla.activa {
+      display: flex;
+    }
+    .titulo {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .barra-instruccion {
+      background-color: #338DFF;
+      color: white;
+      padding: 8px 10px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+    .mic-icono {
+      font-size: 24px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .respuesta-box {
+      font-size: 16px;
+      margin-top: 5px;
+      text-align: center;
+    }
+   .tarjeta {
+  background-color: #F0F0F0;
+  color: black;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 14px;
+  width: 100%;
+  max-width: 370px;
+  box-sizing: border-box;
+}
+    .tarjeta p {
+      margin: 4px 0;
+    }
+    .boton-listo {
+      margin-top: 20px;
+      background-color: #00C853;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .boton-listo:hover {
+      background-color: #00b04f;
+    }
+    .boton-repetir {
+      margin-top: 10px;
+      background-color: #0E4C92;
+      border: none;
+      padding: 8px 16px;
+      font-size: 14px;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .campo-login {
+      width: 100%;
+      max-width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .input-wrapper {
+      background-color: white;
+      border-radius: 6px;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+    }
+    input[type="text"], input[type="password"] {
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      width: 100%;
+      outline: none;
+      background: transparent;
+    }
+    .pantalla input::placeholder {
+      color: gray;
+    }
+  </style>
 </head>
 <body>
-  <h1>Simulador Voice Picking</h1>
+  <div class="container">
+    <!-- Pantalla de Login -->
+    <div class="pantalla activa" id="pantalla0">
+      <div class="titulo">WMS</div>
+      <div class="campo-login">
+        <div class="input-wrapper">
+          <input type="text" id="usuario" placeholder="Usuario">
+        </div>
+        <div class="input-wrapper">
+          <input type="password" id="contrasena" placeholder="Contraseña">
+        </div>
+      </div>
+      <button class="boton-listo" onclick="iniciarSimulacion()">Ingresar</button>
+    </div>
+
+
+
+
+
+
+<!-- Pantalla 1: Pantalla de opciones -->
+<div class="pantalla" id="pantalla1">
+
+  <div class="titulo">Opciones</div>
+  <div class="menu-opciones">
+    <div class="opcion">
+      <img class="icono" alt="consultas" src="https://i.imgur.com/OEJfH6l.png" />
+      <div class="texto">CONSULTAS</div>
+    </div>
+    <div class="opcion" onclick="cambiarPantalla(2); leerTexto('En esta pantalla tenemos que elegir la tarea que vamos a realizar, en este caso eligiremos la opción VOICE PICKING.', 'mic2')">
+      <img class="icono" alt="tareas" src="https://i.imgur.com/QzcqC9v.png" />
+      <div class="texto">TAREAS</div>
+    </div>
+  </div>
+  <div class="mic-icono" id="mic1">🎤</div>
+</div>
+
+<style>
+  .menu-opciones {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    margin-top: 30px;
+  }
+
+  .opcion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .opcion:hover {
+    transform: scale(1.05);
+  }
+
+  .icono {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+  }
+
+  .texto {
+    margin-top: 10px;
+  }
+  
+  #pantalla7 {
+  overflow-y: auto;
+  max-height: 100vh;
+  padding-bottom: 20px;
+}
+
+</style>
+
+
+<!-- Pantalla 2: Elección de tipo de tarea -->
+<div class="pantalla" id="pantalla2">
+  <div class="titulo">Tareas</div>
+  <div class="lista-tareas">
+    <div class="tarea-opcion">
+      <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" alt="pl-completo" width="20" height="20">
+      <span>PL Completo</span>
+    </div>
+    <div class="tarea-opcion seleccionable" onclick="cambiarPantalla(3); leerTexto('Seleccionaste voice picking. Vamos a comenzar, En esta pantalla debemos ingresar el vehiculo que vamos a operar, En este caso ingresar el vehiculo A P.', 'mic3')">
+      <img src="https://cdn-icons-png.flaticon.com/512/681/681494.png" alt="voice-picking" width="20" height="20">
+      <span>Voice Picking</span>
+    </div>
+  </div>
+  <div class="mic-icono" id="mic2">🎤</div>
+</div>
+
+<style>
+.lista-tareas {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  max-width: 350px;
+  margin-top: 20px;
+}
+.tarea-opcion {
+  background-color: #e0e0e0;
+  color: #333;
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: default;
+}
+.tarea-opcion img {
+  margin-right: 10px;
+}
+.tarea-opcion.seleccionable {
+  background-color: #c5e1a5;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.tarea-opcion.seleccionable:hover {
+  background-color: #aed581;
+}
+</style>
+
+
+
+
+
+<!-- Pantalla 3: Ingreso manual de tarea (poner AP) -->
+<div class="pantalla" id="pantalla3">
+  <div class="titulo">Ingresa el vehículo</div>
+  <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 30px;">
+    <input type="text" id="vehiculo" placeholder="Vehículo" style="border: none; border-bottom: 2px solid white; background: transparent; color: white; font-size: 18px; padding: 10px; width: 180px;">
+    <button class="boton-listo" style="background-color: #2E7D32; padding: 10px 20px;" onclick="verificarVehiculo()">BUSCAR</button>
+  </div>
+  <div class="mic-icono" id="mic3">🎤</div>
+</div>
+
+<!-- Pantalla 4: Descripción de tarea -->
+<div class="pantalla" id="pantalla4">
+  <div class="titulo">AP - APILADORA SCJ</div>
+  <div class="tarjeta" style="background: transparent; border: none; display: flex; justify-content: space-between; width: 100%; max-width: 300px; color: white; font-size: 16px; margin-bottom: 30px;">
+    <span>Cap. máxima: 2</span>
+    <span style="text-align: right;">Nivel máximo: 6</span>
+  </div>
+  <button class="boton-listo" style="background-color: #2E7D32;" onclick="cambiarPantalla(5); leerTexto('¿Listo para Trabajar?.', 'mic4')">COMENZAR</button>
+  <div class="mic-icono" id="mic4">🎤</div>
+</div>
+
+
+<style>
+.menu-opciones {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  margin-top: 30px;
+}
+.boton-circular {
+  background-color: rgba(0, 200, 83, 0.3);
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  padding: 10px;
+}
+.boton-circular:hover {
+  background-color: rgba(0, 200, 83, 0.5);
+}
+.boton-circular .texto {
+  margin-top: 8px;
+}
+.opcion-tarea {
+  background-color: #ffffff10;
+  padding: 10px 20px;
+  margin: 10px;
+  border-radius: 6px;
+  width: 80%;
+  color: white;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border: 1px solid white;
+}
+.opcion-tarea:hover {
+  background-color: #ffffff20;
+}
+</style>
+
+<script>
+function verificarVehiculo() {
+  const vehiculo = document.getElementById('vehiculo').value.trim().toUpperCase();
+  if (vehiculo === 'AP') {
+    cambiarPantalla(4);
+    leerTexto('¿Listo para trabajar?.', 'mic4');
+  } else {
+    alert('Ingresá "AP" para continuar.');
+  }
+}
+</script>
+
+<!-- Pantalla 5: ¿Listo para trabajar? -->
+<div class="pantalla" id="pantalla5">
+<script>
+    document.getElementById('pantalla5').addEventListener('transitionend', () => {
+      iniciarReconocimiento(['listo'], function() {
+        document.querySelector('#pantalla5 .boton-listo').click();
+      });
+    });
+    </script>
+  <div class="titulo">Tarea</div>
+  <div class="barra-instruccion">¿Listo para trabajar?</div>
+  <div class="mic-icono" id="mic5">🎤</div>
+  <button class="boton-listo" onclick="cambiarPantalla(6); setTimeout(() => leerTexto('En esta pantalla debemos inicialmente selecionar el botón de la derecha inferior para ver el detalle del cliente. Por favor apreta el botón', 'mic6'), 300);">Listo</button>
+  <button class="boton-repetir" onclick="leerTexto('¿Listo para trabajar?', 'mic5')">🔊 Repetir audio</button>
+</div>
+
+<style>
+.menu-opciones {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  margin-top: 30px;
+}
+.boton-circular {
+  background-color: rgba(0, 200, 83, 0.3);
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  padding: 10px;
+}
+.boton-circular:hover {
+  background-color: rgba(0, 200, 83, 0.5);
+}
+.boton-circular .texto {
+  margin-top: 8px;
+}
+.opcion-tarea {
+  background-color: #ffffff10;
+  padding: 10px 20px;
+  margin: 10px;
+  border-radius: 6px;
+  width: 80%;
+  color: white;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border: 1px solid white;
+}
+.opcion-tarea:hover {
+  background-color: #ffffff20;
+}
+</style>
+
+<script>
+function verificarVehiculo() {
+  const vehiculo = document.getElementById('vehiculo').value.trim().toUpperCase();
+  if (vehiculo === 'AP') {
+    cambiarPantalla(4);
+    setTimeout(() => leerTexto('Tarea asignada. Presioná comenzar.', 'mic4'), 300);
+  } else {
+    alert('Ingresá "AP" para continuar.');
+  }
+}
+
+function cambiarPantalla(id) {
+  document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+  document.getElementById('pantalla' + id).classList.add('activa');
+  const mic = document.getElementById('mic' + id);
+  if (mic) mic.textContent = '🎤';
+}
+
+function leerTexto(texto, micId) {
+  if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+    const msg = new SpeechSynthesisUtterance(texto);
+    msg.lang = 'es-ES';
+    msg.rate = 0.95;
+    const voces = speechSynthesis.getVoices();
+    const vozFemenina = voces.find(v => v.lang.startsWith('es') && v.name.toLowerCase().includes('female')) || voces.find(v => v.lang.startsWith('es'));
+    if (vozFemenina) msg.voice = vozFemenina;
+    msg.onstart = function() {
+      if (micId) {
+        const mic = document.getElementById(micId);
+        if (mic) mic.textContent = '🎤';
+      }
+    };
+    msg.onend = function() {
+      const beep = new Audio("https://freesound.org/data/previews/341/341695_626119-lq.mp3");
+      beep.play();
+      if (micId) {
+        const mic = document.getElementById(micId);
+        if (mic) mic.textContent = '🎤✔️';
+      }
+    };
+    speechSynthesis.speak(msg);
+  }
+}
+</script>
+
+<!-- Pantalla 6: Ir a ubicación y flecha para ver descripción -->
+<div class="pantalla" id="pantalla6">
+  <div class="titulo">Tarea</div>
+  <div class="barra-instruccion">Ir a la ubicación SPK-009-091-001, CAJA 22</div>
+
+  <div class="tarjeta" style="margin-bottom: 10px;">
+    <p><strong>ECHO CLASICO DP 450ML/15/AR</strong></p>
+    <p style="display: flex; justify-content: space-between;">
+      <span>22</span>
+      <span style="background: lightgray; padding: 2px 6px; border-radius: 4px;">SPK-009-091-001</span>
+    </p>
+    <p style="font-size: 12px; color: #555;">Cumplido: 0</p>
+  </div>
+
+  <div class="tarjeta" style="margin-bottom: 30px;">
+    <p><strong>MM MULTI Y VIDRIOS DP 15 X 450ML AR</strong></p>
+    <p style="display: flex; justify-content: space-between;">
+      <span>22</span>
+      <span style="background: #E53935; color: white; padding: 2px 6px; border-radius: 4px;">SPK-009-090-001</span>
+    </p>
+    <p style="font-size: 12px; color: #555;">Cumplido: 0</p>
+  </div>
+
+  <!-- Nuevo botón flotante con flechita ∧ -->
+  <div style="position: fixed; bottom: 20px; right: 20px; animation: bounce 1.5s infinite;">
+    <div onclick="cambiarPantalla(7); leerTexto('Si el cliente antes del nombre tiene un número 1 significa que la preparación por cada SKU tiene que ir en un pálet separado, lo que se conoce como un pálet por SKU. Si dice número 2, tiene que ir preparado en un solo pálet, una camada arriba de otra y los bultos sueltos arriba de todos. En el caso que tenga un número 3, la preparación debe ir apilada en torre aunque la cantidad sea una camada. Arriba del simulador se encuentran los ejemplos de cada tipo de preparación.', 'mic7')" 
+         style="width: 60px; height: 60px; background-color: rgba(128, 128, 128, 0.15); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); cursor: pointer;">
+      <div style="font-size: 30px; color: rgba(0, 0, 0, 0.3); transform: scaleX(1.6); user-select: none;">∧</div>
+    </div>
+    <div style="position: absolute; bottom: -30px; right: 10px; font-size: 24px; animation: fadeInOut 1.5s infinite;">👆</div>
+  </div>
+
+  <div class="mic-icono" id="mic6">🎤</div>
+</div>
+
+
+<!-- Pantalla 7: Ver descripción del pedido -->
+<div class="pantalla" id="pantalla7">
+    <div class="titulo">Descripción del Pedido</div>
+    <div class="barra-instruccion">Verificá el tipo de preparación</div>
+    <div class="mic-icono" id="mic7">🎤</div>
+    <div class="tarjeta">
+      <p>Si delante del cliente hay:</p>
+      <ul style="list-style: none; padding-left: 0;">
+        <li>
+          <strong>[1]:</strong> Pallet por SKU (cada producto en un pallet separado)<br>
+          <img src="https://i.imgur.com/tPNaWkO.png" alt="Pallet por SKU"
+               style="max-width:100%; margin-top:10px; border-radius:10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+        </li>
+        <li style="margin-top: 20px;">
+          <strong>[2]:</strong> Base por base (preparación en un solo pallet)<br>
+          <img src="https://i.imgur.com/dWhhoVI.png" alt="Base por base"
+               style="max-width:100%; margin-top:10px; border-radius:10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+        </li>
+        <li style="margin-top: 20px;">
+          <strong>[3]:</strong> Panadera en torre (preparación apilada)<br>
+          <img src="https://i.imgur.com/6EFejcX.png" alt="Panadera en torre"
+               style="max-width:100%; margin-top:10px; border-radius:10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+        </li>
+      </ul>
+    </div>
+    <button class="boton-listo"
+            onclick="cambiarPantalla(75); leerTexto('En este caso, el cliente TREOLAND tiene un 2 delante, por ende la preparación tiene que ser base por base en un solo pálet y las unidades sueltas arriba.', 'mic75')">
+      Listo
+    </button>
+  </div>
+  
+
+<!-- Pantalla 7.5: Descripción específica del cliente (Corregida según imagen) -->
+<div class="pantalla" id="pantalla75">
+  <div class="titulo">Tarea</div>
+  <div class="barra-instruccion">Ir a Ubicacion SPK-009-091-001, CAJA 22</div>
+  <div class="mic-icono" id="mic75">🎤</div>
+  <div class="tarjeta">
+    <p><strong>Info</strong></p>
+    <p>Bultos: 44</p>
+    <p>Bultos Pendientes: 44</p>
+    <p>Cliente: <span style="font-weight:bold; text-decoration:underline;">[2]</span> TREOLAND-LOMAS DE ZAMORA</p>
+    <p>Cross Dock: NO</p>
+    <p>Pallet: 779052307987532</p>
+    <p>Entrega: 128266</p>
+    <p>Reparto: 134744</p>
+    <p>Ubicación destino: ADE-043-000-000</p>
+    <p>Minutos transcurridos: 0</p>
+  </div>
+  <button class="boton-listo" onclick="cambiarPantalla(8); leerTexto('Escaneá la ubicación. La ubicación es SPK 009 091 001. SPK es la nave, en este caso sector de picking, 009 es el pasillo número 9, 091 es la ubicación dentro del pasillo y 001 corresponde al nivel, en este caso el piso.', 'mic8')">Listo</button>
+</div>
+
+<style>
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+</style>
+
+<!-- Pantalla 8: Escaneo de ubicación con Simulación y Cuadro informativo -->
+<div class="pantalla" id="pantalla8">
+  <div class="titulo">Escaneo</div>
+  <div class="barra-instruccion">Escaneá la ubicación</div>
+  <div class="mic-icono" id="mic8">🎤</div>
+
+  <div class="tarjeta">
+    <p style="font-weight:bold;">Ubicación: SPK-009-091-001</p>
+  </div>
+
+  <div class="tarjeta" style="margin-top: 15px; background-color: #e3f2fd;">
+    <p style="color: #0d47a1; font-weight: bold;">¿Qué significan las coordenadas?</p>
+    <ul style="color: #333;">
+      <li><strong>SPK:</strong> Nave (Sector de PICKING)</li>
+      <li><strong>009:</strong> Pasillo 9</li>
+      <li><strong>091:</strong> Ubicación dentro del pasillo</li>
+      <li><strong>001:</strong> Nivel (en este caso el piso)</li>
+    </ul>
+  </div>
+
+  <button class="boton-listo" onclick="cambiarPantalla(85); leerTexto('Ubicación escaneada.Ahora para continuar con la tarea debes escanear el DUN14 de la caja. Es un código de barras que encontrarás siempre en el frente o lateral de la caja, identifica el tipo de producto.', 'mic9')" style="margin-top: 20px;">Simular Escaneo</button>
+</div>
+
+<script>
+  document.getElementById("pantalla85").addEventListener("transitionend", () => {
+    leerTexto(" Etiqueta Escaneada ", "mic8");
+  });
+</script>
+
+<style>
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+</style>
+
+<!-- Pantalla 8.5: Escanear últimos 4 dígitos del DUN 14 -->
+<div class="pantalla" id="pantalla85">
+<script>
+    document.getElementById('pantalla85').addEventListener('transitionend', () => {
+      iniciarReconocimiento(['listo'], function() {
+        document.querySelector('#pantalla85 .boton-listo').click();
+      });
+    });
+    </script>
+  <div class="titulo">Tarea</div>
+  <div class="barra-instruccion">Últimos 4 dígitos del DUN 14</div>
+  <div class="mic-icono" id="mic85">🎤</div>
+
+  <div class="tarjeta" style="margin-bottom: 10px;">
+    <p><strong>MM MULTI Y VIDRIOS DP 15 X 450ML AR</strong></p>
+    <p style="display: flex; justify-content: space-between;">
+      <span>Cantidad: 22</span>
+      <span style="background: lightgray; padding: 2px 6px; border-radius: 4px;">SPK-009-090-001</span>
+    </p>
+    <p style="font-size: 12px; color: #555;">Cumplido: 0</p>
+  </div>
+
+  <div class="tarjeta" style="margin-bottom: 20px;">
+    <p><strong>ECHO CLASICO DP 450ML/15/AR</strong></p>
+    <p style="display: flex; justify-content: space-between;">
+      <span>Cantidad: 22</span>
+      <span style="background: #E53935; color: white; padding: 2px 6px; border-radius: 4px;">SPK-009-091-001</span>
+    </p>
+    <p style="font-size: 12px; color: #555;">Cumplido: 0</p>
+  </div>
+
+  <div class="tarjeta" style="background-color: #e3f2fd;">
+    <p style="color: #0d47a1; font-weight: bold;">¿Qué es el DUN 14?</p>
+    <p style="color: #333;">Es un código de barras que encontrarás siempre en el frente o lateral de la caja, identifica el tipo de producto.</p>
+  </div>
+
+  <button class="boton-listo" onclick="cambiarPantalla(9); leerTexto('Código escaneado correctamente. Continúa con la siguiente tarea tomando las cajas solicitadas y poniendola en el pálet, una vez finalizado decir LISTO.', 'mic9')" style="margin-top: 20px;">Simular Escaneo</button>
+
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(reg => console.log("SW registrado", reg))
-        .catch(err => console.log("SW error", err));
-    }
+    document.getElementById('pantalla85').addEventListener('transitionend', () => {
+      leerTexto('Escaneá los últimos 4 dígitos del DUN 14. El código se encuentra en el frente o lateral de la caja.', 'mic85');
+    });
   </script>
+</div>
+
+<!-- Pantalla 9: Tomar cajas -->
+<div class="pantalla" id="pantalla9">
+<script>
+    document.getElementById('pantalla9').addEventListener('transitionend', () => {
+      iniciarReconocimiento(['listo'], function() {
+        document.querySelector('#pantalla9 .boton-listo').click();
+      });
+    });
+    </script>
+  <div class="titulo">Tarea</div>
+  <div class="barra-instruccion">Tomá 4 cajas del producto</div>
+  <div class="mic-icono" id="mic9">🎤</div>
+  <div class="tarjeta">
+    <p>Producto: MM MULTI Y VIDRIOS DP 15 x 450ML AR</p>
+    <p>Ubicación: SPK-009-090-001</p>
+    <p>Cantidad: 4</p>
+  </div>
+  <button class="boton-listo" onclick="cambiarPantalla(10); leerTexto('¿Cuántas camadas completas quedan en la ubicación? Decí por ejemplo: uno , dos para confirmar doce.', 'mic10')">Listo</button>
+</div>
+
+<!-- Pantalla 10: Camadas remanentes -->
+<div class="pantalla" id="pantalla10">
+<script>
+    document.getElementById('pantalla10').addEventListener('transitionend', () => {
+      iniciarReconocimiento(['uno','dos'], function() {
+        document.querySelector('#pantalla10 .boton-listo').click();
+      });
+    });
+    </script>
+  <div class="titulo">Tarea</div>
+  <div class="barra-instruccion">¿Cuántas camadas remanentes quedan?</div>
+  <div class="mic-icono" id="mic10">🎤</div>
+  <div class="tarjeta">
+    <p>Respondé con dos números. Ejemplo: uno, dos para 12.</p>
+  </div>
+  <button class="boton-listo" onclick="cambiarPantalla(11); leerTexto('¿Confirmás la cantidad informada? REPONDER SÍ ', 'mic11')">DECIR: 1, 2.</button>
+</div>
+
+<!-- Pantalla 11: Confirmar camadas -->
+<div class="pantalla" id="pantalla11">
+<script>
+    document.getElementById('pantalla11').addEventListener('transitionend', () => {
+      iniciarReconocimiento(['sí'], function() {
+        document.querySelector('#pantalla11 .boton-listo').click();
+      });
+    });
+    </script>
+  <div class="titulo">Confirmación</div>
+  <div class="barra-instruccion">¿Confirmás la cantidad informada?</div>
+  <div class="mic-icono" id="mic11">🎤</div>
+  <button class="boton-listo" onclick="cambiarPantalla(115); leerTexto('¿Cuántos bultos sueltos quedan en la ubicación? Confirma cuántos bultos sueltos quedan. Decí primero el primer número y luego el segundo, por ejemplo, uno y cinco para confirmar quince', 'mic12')">SÍ</button>
+</div>
+
+
+<!-- Pantalla 11.5: Confirmar bultos sueltos -->
+<div class="pantalla" id="pantalla115">
+<script>
+    document.getElementById('pantalla115').addEventListener('transitionend', () => {
+      iniciarReconocimiento(['uno','cinco'], function() {
+        document.querySelector('#pantalla115 .boton-listo').click();
+      });
+    });
+    </script>
+  <div class="titulo">Tarea</div>
+  <div class="barra-instruccion">Bultos Sueltos</div>
+  <div class="mic-icono" id="mic115">🎤</div>
+
+  <div class="tarjeta" style="margin-bottom: 10px;">
+    <p><strong>MM MULTI Y VIDRIOS DP 15 X 450ML AR</strong></p>
+    <p style="display: flex; justify-content: space-between;">
+      <span>Cantidad: 22</span>
+      <span style="background: #338DFF; color: white; padding: 2px 6px; border-radius: 4px;">SPK-009-090-001</span>
+    </p>
+    <p style="font-size: 12px; color: #555;">Cumplido: 0</p>
+  </div>
+
+  <div class="tarjeta" style="margin-bottom: 20px;">
+    <p><strong>ECHO CLASICO DP 450ML/15/AR</strong></p>
+    <p style="display: flex; justify-content: space-between;">
+      <span>Cantidad: 22</span>
+      <span style="background: #E53935; color: white; padding: 2px 6px; border-radius: 4px;">SPK-009-091-001</span>
+    </p>
+    <p style="font-size: 12px; color: #555;">Cumplido: 0</p>
+  </div>
+
+  <button class="boton-listo" onclick="cambiarPantalla(12); leerTexto('En el caso de que te solicite realizar una reposición te va a decir: Realice la repo y diga Listo. Para ello, deberás tomar el pálet que se encuentra detrás del pálet del cual tomaste las cajas y ponerlo en la ubicación que dejaste vacía, luego realizado el movimiento decir LISTO', 'mic12')">DECIR: 1, 5.</button>
+
+  <script>
+    document.getElementById('pantalla115').addEventListener('transitionend', () => {
+      leerTexto('En el caso de que te solicite realizar una reposición te va a decir: Realice la repo y diga Listo. Para ello, deberás tomar el pálet que se encuentra detrás del pálet del cual tomaste las cajas y ponerlo en la ubicación que dejaste vacía, luego realizado el movimiento decir LISTO.', 'mic115');
+    });
+  </script>
+</div>
+
+
+
+<!-- Pantalla 12: Reposicionar pallet -->
+<div class="pantalla" id="pantalla12">
+<script>
+    document.getElementById('pantalla12').addEventListener('transitionend', () => {
+      iniciarReconocimiento(['listo'], function() {
+        document.querySelector('#pantalla12 .boton-listo').click();
+      });
+    });
+    </script>
+  <div class="titulo">Tarea</div>
+  <div class="barra-instruccion">Realice la Repo y diga LISTO</div>
+  <div class="mic-icono" id="mic12">🎤</div>
+
+  <div class="tarjeta" style="margin-bottom: 10px;">
+    <p><strong>ECHO CLASICO DP 450ML/15/AR</strong></p>
+    <p style="display: flex; justify-content: space-between;">
+      <span>Cantidad: 22</span>
+      <span style="background: #E53935; color: white; padding: 2px 6px; border-radius: 4px;">SPK-009-091-001</span>
+    </p>
+    <p style="font-size: 12px; color: #555;">Cumplido: 0</p>
+  </div>
+
+  <div class="tarjeta" style="margin-bottom: 20px;">
+    <p><strong>MM MULTI Y VIDRIOS DP 15 X 450ML AR</strong></p>
+    <p style="display: flex; justify-content: space-between;">
+      <span>Cantidad: 22</span>
+      <span style="background: #E53935; color: white; padding: 2px 6px; border-radius: 4px;">SPK-009-090-001</span>
+    </p>
+    <p style="font-size: 12px; color: #555;">Cumplido: 0</p>
+  </div>
+
+  <button class="boton-listo" onclick="cambiarPantalla(13); leerTexto('Movimiento confirmado. Ahora el sistema te solicitará que te acerques a la impresora una vez enfrente de ella, decí LISTO para que salga la etiqueta de tu pedido.', 'mic13')">Listo</button>
+
+  <script>
+    document.getElementById('pantalla12').addEventListener('transitionend', () => {
+      leerTexto('Realiza la reposición, tomando el pallet de atrás de la ubicación verificando que sea el mismo producto y colócalo en la ubicación vacía. Cuando termines, decí LISTO.', 'mic12');
+    });
+  </script>
+</div>
+
+
+<!-- Pantalla 13: Etiqueta -->
+<div class="pantalla" id="pantalla13">
+<script>
+    document.getElementById('pantalla13').addEventListener('transitionend', () => {
+      iniciarReconocimiento(['listo'], function() {
+        document.querySelector('#pantalla13 .boton-listo').click();
+      });
+    });
+    </script>
+  <div class="titulo">Tarea</div>
+  <div class="barra-instruccion">Acérquese a la impresora y aguarde la etiqueta</div>
+  <div class="mic-icono" id="mic13">🎤</div>
+
+  <div class="tarjeta" style="margin-bottom: 10px;">
+    <p><strong>ECHO CLASICO DP 450ML/15/AR</strong></p>
+    <p style="display: flex; justify-content: space-between;">
+      <span>Cantidad: 22</span>
+      <span style="background: #43A047; color: white; padding: 2px 6px; border-radius: 4px;">SPK-009-091-001</span>
+    </p>
+    <p style="font-size: 12px; color: #555;">Cumplido: 22</p>
+  </div>
+
+  <div class="tarjeta" style="margin-bottom: 20px;">
+    <p><strong>MM MULTI Y VIDRIOS DP 15 X 450ML AR</strong></p>
+    <p style="display: flex; justify-content: space-between;">
+      <span>Cantidad: 22</span>
+      <span style="background: #43A047; color: white; padding: 2px 6px; border-radius: 4px;">SPK-009-090-001</span>
+    </p>
+    <p style="font-size: 12px; color: #555;">Cumplido: 22</p>
+  </div>
+
+  <button class="boton-listo" onclick="cambiarPantalla(14); leerTexto('Etiqueta lista,Ahora la etiqueta ya impresa deberás pegarla en el pálett y confirmar el Muelle. En este ejemplo Confirme el muelle ADE 43 diciendo CUATRO, TRES. y deje el pálet en la aduana para su respectivo control.', 'mic14')">Listo</button>
+
+  <script>
+    document.getElementById('pantalla13').addEventListener('transitionend', () => {
+      leerTexto('Acérquese a la impresora al lado de la oficina operativa, y diga LISTO para imprimir la etiqueta.', 'mic13');
+    });
+  </script>
+</div>
+
+<!-- Pantalla 14: Confirmar ubicación destino -->
+<div class="pantalla" id="pantalla14">
+<script>
+    document.getElementById('pantalla14').addEventListener('transitionend', () => {
+      iniciarReconocimiento(['cuatro','tres'], function() {
+        document.querySelector('#pantalla14 .boton-listo').click();
+      });
+    });
+    </script>
+  <div class="titulo">Tarea</div>
+  <div class="barra-instruccion">Confirme Ubicación Destino ADE-043-000-000 y diga el número de muelle</div>
+  <div class="mic-icono" id="mic14">🎤</div>
+
+  <div class="tarjeta" style="margin-bottom: 10px;">
+    <p><strong>ECHO CLASICO DP 450ML/15/AR</strong></p>
+    <p style="display: flex; justify-content: space-between;">
+      <span>Cantidad: 22</span>
+      <span style="background: #43A047; color: white; padding: 2px 6px; border-radius: 4px;">SPK-009-091-001</span>
+    </p>
+    <p style="font-size: 12px; color: #555;">Cumplido: 1</p>
+  </div>
+
+  <div class="tarjeta" style="margin-bottom: 20px;">
+    <p><strong>MM MULTI Y VIDRIOS DP 15 X 450ML AR</strong></p>
+    <p style="display: flex; justify-content: space-between;">
+      <span>Cantidad: 22</span>
+      <span style="background: #43A047; color: white; padding: 2px 6px; border-radius: 4px;">SPK-009-090-001</span>
+    </p>
+    <p style="font-size: 12px; color: #555;">Cumplido: 1</p>
+  </div>
+
+  <button class="boton-listo" onclick="cambiarPantalla(15); leerTexto('!Felicitaciones! Terminaste la simulación de tareas, ya sabés como se utiliza nuestro sistema. Ahora busca al supevisor o líder e informale que estás listo.', 'mic15')">Listo</button>
+
+  <script>
+    document.getElementById('pantalla14').addEventListener('transitionend', () => {
+      leerTexto('Confirme el muelle ADE 43 diciendo CUATRO, TRES. y deje el pálet en la aduana para su respectivo control.', 'mic14');
+    });
+  </script>
+</div>
+
+<!-- Pantalla 15: Pantalla final -->
+<div class="pantalla" id="pantalla15">
+  <div class="titulo" style="font-size: 24px; margin-top: 50px;">¡Felicitaciones!</div>
+  <div class="barra-instruccion">Terminaste la simulación de tareas</div>
+  <div class="tarjeta" style="margin-top: 20px; text-align: center;">
+    <p>Ya sabés cómo se utiliza nuestro sistema.</p>
+    <p>Ahora buscá al supervisor o líder e informale que estás listo.</p>
+  </div>
+  <div class="mic-icono" id="mic15">🎤</div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (document.getElementById('pantalla15').classList.contains('activa')) {
+        leerTexto('¡Felicitaciones! Terminaste la simulación de tareas. Ya sabés cómo se utiliza nuestro sistema. Ahora buscá al supervisor o líder e informale que estás listo.', 'mic15');
+      }
+    });
+  </script>
+</div>
+
+
+<script>
+  
+function cambiarPantalla(n) {
+  const pantallas = document.querySelectorAll('.pantalla');
+  pantallas.forEach(p => p.classList.remove('activa'));
+  const nuevaPantalla = document.getElementById('pantalla' + n);
+  if (nuevaPantalla) {
+    nuevaPantalla.classList.add('activa');
+      if(n === 5) {
+    iniciarReconocimiento(['listo'], function() {
+      document.querySelector('#pantalla5 .boton-listo').click();
+    });
+  }
+  if(n === 85) {
+    iniciarReconocimiento(['listo'], function() {
+      document.querySelector('#pantalla85 .boton-listo').click();
+    });
+  }
+  if(n === 9) {
+    iniciarReconocimiento(['listo'], function() {
+      document.querySelector('#pantalla9 .boton-listo').click();
+    });
+  }
+  if(n === 10) {
+    iniciarReconocimiento(['uno','dos'], function() {
+      document.querySelector('#pantalla10 .boton-listo').click();
+    });
+  }
+  if(n === 11) {
+    iniciarReconocimiento(['sí'], function() {
+      document.querySelector('#pantalla11 .boton-listo').click();
+    });
+  }
+  if(n === 115) {
+    iniciarReconocimiento(['uno','cinco'], function() {
+      document.querySelector('#pantalla115 .boton-listo').click();
+    });
+  }
+  if(n === 12) {
+    iniciarReconocimiento(['listo'], function() {
+      document.querySelector('#pantalla12 .boton-listo').click();
+    });
+  }
+  if(n === 13) {
+    iniciarReconocimiento(['listo'], function() {
+      document.querySelector('#pantalla13 .boton-listo').click();
+    });
+  }
+  if(n === 14) {
+    iniciarReconocimiento(['cuatro','tres'], function() {
+      document.querySelector('#pantalla14 .boton-listo').click();
+    });
+  }
+  } else {
+    alert('No existe la pantalla ' + n);
+  }
+}
+function leerTexto(texto, micId) {
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+      const msg = new SpeechSynthesisUtterance(texto);
+      msg.lang = 'es-ES';
+      msg.rate = 0.95;
+      const voces = speechSynthesis.getVoices();
+      const vozFemenina = voces.find(v => v.lang.startsWith('es') && v.name.toLowerCase().includes('female')) || voces.find(v => v.lang.startsWith('es'));
+      if (vozFemenina) msg.voice = vozFemenina;
+      msg.onend = function() {
+        if (micId) {
+          const mic = document.getElementById(micId);
+          if (mic) mic.textContent = '🎤✔️';
+          const beep = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
+          beep.play();
+        }
+      };
+      speechSynthesis.speak(msg);
+    }
+  }
+
+  function iniciarSimulacion() {
+    cambiarPantalla(1);
+    setTimeout(() => leerTexto('Bienvenido. Vamos a realizar una simulación del voice picking phone para que aprendas, En esta pantalla debemos seleccionar TAREAS.', 'mic1'), 300);
+  }
+</script>
+
+
+<script>
+function iniciarReconocimiento(palabrasClave, accion) {
+  const reconocimiento = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  reconocimiento.lang = "es-ES";
+  reconocimiento.continuous = false;
+  reconocimiento.interimResults = false;
+
+  reconocimiento.onresult = function(event) {
+    const texto = event.results[0][0].transcript.toLowerCase();
+    console.log("Escuchado:", texto);
+    if (palabrasClave.some(palabra => texto.includes(palabra))) {
+      accion();
+    } else {
+      reconocimiento.start();
+    }
+  };
+
+  reconocimiento.onerror = function(event) {
+    console.error("Error de reconocimiento:", event.error);
+    reconocimiento.start();
+  };
+
+  reconocimiento.start();
+}
+</script>
+
 </body>
 </html>
+<script>
+
+function cambiarPantalla(n) {
+  const pantallas = document.querySelectorAll('.pantalla');
+  pantallas.forEach(p => p.classList.remove('activa'));
+  const nuevaPantalla = document.getElementById('pantalla' + n);
+  if (nuevaPantalla) {
+    nuevaPantalla.classList.add('activa');
+      if(n === 5) {
+    iniciarReconocimiento(['listo'], function() {
+      document.querySelector('#pantalla5 .boton-listo').click();
+    });
+  }
+  if(n === 85) {
+    iniciarReconocimiento(['listo'], function() {
+      document.querySelector('#pantalla85 .boton-listo').click();
+    });
+  }
+  if(n === 9) {
+    iniciarReconocimiento(['listo'], function() {
+      document.querySelector('#pantalla9 .boton-listo').click();
+    });
+  }
+  if(n === 10) {
+    iniciarReconocimiento(['uno','dos'], function() {
+      document.querySelector('#pantalla10 .boton-listo').click();
+    });
+  }
+  if(n === 11) {
+    iniciarReconocimiento(['sí'], function() {
+      document.querySelector('#pantalla11 .boton-listo').click();
+    });
+  }
+  if(n === 115) {
+    iniciarReconocimiento(['uno','cinco'], function() {
+      document.querySelector('#pantalla115 .boton-listo').click();
+    });
+  }
+  if(n === 12) {
+    iniciarReconocimiento(['listo'], function() {
+      document.querySelector('#pantalla12 .boton-listo').click();
+    });
+  }
+  if(n === 13) {
+    iniciarReconocimiento(['listo'], function() {
+      document.querySelector('#pantalla13 .boton-listo').click();
+    });
+  }
+  if(n === 14) {
+    iniciarReconocimiento(['cuatro','tres'], function() {
+      document.querySelector('#pantalla14 .boton-listo').click();
+    });
+  }
+  } else {
+    alert('No existe la pantalla ' + n);
+  }
+}
+else {
+    alert('No existe la pantalla ' + n);
+  }
+}
+
+function leerTexto(texto, micId) {
+  if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+    const msg = new SpeechSynthesisUtterance(texto);
+    msg.lang = 'es-ES';
+    msg.rate = 0.95;
+    const voces = speechSynthesis.getVoices();
+    const vozFemenina = voces.find(v => v.lang.startsWith('es') && v.name.toLowerCase().includes('female')) || voces.find(v => v.lang.startsWith('es'));
+    if (vozFemenina) msg.voice = vozFemenina;
+    msg.onstart = function() {
+      if (micId) {
+        const mic = document.getElementById(micId);
+        if (mic) mic.textContent = '🎤';
+      }
+    };
+    msg.onend = function() {
+      const beep = new Audio("https://freesound.org/data/previews/341/341695_626119-lq.mp3");
+      beep.play();
+      if (micId) {
+        const mic = document.getElementById(micId);
+        if (mic) mic.textContent = '🎤✔️';
+      }
+    };
+    speechSynthesis.speak(msg);
+  }
+}
+
+function iniciarSimulacion() {
+  cambiarPantalla(1);
+  setTimeout(() => leerTexto('Bienvenido. Vamos a realizar una simulación del voice picking phone para que aprendas. En esta pantalla debemos seleccionar TAREAS.', 'mic1'), 300);
+}
+</script>
